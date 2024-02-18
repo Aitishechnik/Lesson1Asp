@@ -7,7 +7,19 @@ namespace Lesson1
 {
     public class Program
     {
-        public static User? currentUser = null;
+        private static User? _user;
+        public static User? currentUser { 
+            get 
+            {
+                if (_user == null)
+                {
+                    return new User();
+                }
+                
+                return _user;
+            }
+            set => _user = value; 
+        }
 
         public static void Main(string[] args)
         {

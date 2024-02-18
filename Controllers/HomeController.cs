@@ -36,15 +36,30 @@ namespace Lesson1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string login, string password)
         {
-            User? checkUser = (await _context.User.ToListAsync())
+
+            ViewBag.Answer = true;
+            var temp = (await _context.User.Include(x => x.UserPermissions).ToListAsync())
                 .Where(User => User.Login == login && User.Password == password)
-                .ToList()?[0]; //проверка на count > 0
-
+                .ToList(); //проверка на count > 0
+            User? checkUser = temp.Count > 0 ? temp[0] : null;
             if (checkUser != null)
+            {
                 Program.currentUser = checkUser;
+                return View();
+            }
 
-
+            ViewBag.Answer = false;
             return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+
+            Program.currentUser = null;
+
+            return RedirectToAction("Index");
         }
 
         //1. ѕочитать про form в html

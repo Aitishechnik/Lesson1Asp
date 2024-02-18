@@ -4,10 +4,28 @@
 <h1>@ViewData["Title"]</h1>
 
 <div class="login-form">
-    <form asp-action="Login">
-    <input type="text" name="login" placeholder="Логин" />
-    <input type="password" name="password" placeholder="Пароль" />
-    <input type="submit" value="Войти" />
-    </form>
+
+    
+        @if(Program.currentUser.ID == 0)
+        {
+        <form asp-action="Login">
+            <input type="text" name="login" placeholder="Логин" />
+            <input type="password" name="password" placeholder="Пароль" />
+            <input type="submit" value="Войти"/>
+        </form>
+        }
+        else
+        {
+            <form asp-action="Logout">
+            <button>Logout</button>
+            <p class="login-error-line">@Program.currentUser.Login вы зашли!</p>
+            </form>
+        }
+    
 </div>
 
+
+@if(ViewBag.Answer == false)
+{
+    <p class="login-error-line">Логин или пароль введен неправильно!</p>
+}

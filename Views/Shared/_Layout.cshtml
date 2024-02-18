@@ -7,24 +7,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Lesson1.styles.css" asp-append-version="true" />
-    <style>
-        .login-form {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
-
-            .login-form input {
-                width: 200px;
-                margin-bottom: 10px;
-            }
-
-            .login-form button {
-                width: 100px;
-            }
-    </style>
+    
 </head>
 <body>
      <header>
@@ -46,12 +29,25 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index">Товары</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Index">Пользователи</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Login">LogIn</a>
-                        </li>
+                        @if (Program.currentUser.HasPermission(PermissionEntity.User, PermissionRight.View))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Index">Пользователи</a>
+                            </li>
+                        }
+                        @if(Program.currentUser.Role == UserRole.Client)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Login">LogIn</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Login">Account, @Program.currentUser.Role</a>
+                            </li>
+                        }
+
                     </ul>
                 </div>
             </div>

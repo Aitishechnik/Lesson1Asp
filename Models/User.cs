@@ -14,6 +14,10 @@ namespace Lesson1.Models
 
         public List<UserPermission>? UserPermissions { get; set; }
 
+        public User() {
+            UserPermissions = new List<UserPermission>();
+        }
+
         public void Init()
         {
             if (UserPermissions == null) 
@@ -63,6 +67,16 @@ namespace Lesson1.Models
             UserPermissions.Add(new UserPermission(PermissionEntity.User, PermissionRight.Update, ID, this));
             UserPermissions.Add(new UserPermission(PermissionEntity.User, PermissionRight.Create, ID, this));
             UserPermissions.Add(new UserPermission(PermissionEntity.User, PermissionRight.Delete, ID, this));
+        }
+
+        public bool HasPermission(PermissionEntity entity, PermissionRight right)
+        {
+            foreach(var permission in UserPermissions)
+            {
+                if(permission.Right == right && permission.Entity == entity)
+                    return true;
+            }
+            return false;
         }
     }
 }
