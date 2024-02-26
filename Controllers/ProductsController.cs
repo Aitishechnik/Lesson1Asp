@@ -95,11 +95,15 @@ namespace Lesson1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,Name,Calories,Shelflife,Category,Description,Price")] Product product)
         {
-            if (ModelState.IsValid)
+            if (Program.currentUser.HasPermission(PermissionEntity.Product, PermissionRight.Delete))
+            {
+
+                if (ModelState.IsValid)
             {
                 _context.Add(product);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                    return RedirectToAction(nameof(Index));
+            }
             }
             return View(product);
         }
@@ -127,29 +131,33 @@ namespace Lesson1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Calories,Shelflife,Category,Description,Price")] Product product)
         {
-            if (id != product.ID)
+            if (Program.currentUser.HasPermission(PermissionEntity.Product, PermissionRight.Delete))
             {
-                return NotFound();
-            }
+                if (id != product.ID)
+                {
+                    return NotFound();
+                }
 
-            if (ModelState.IsValid)
-            {
-                try
+                if (ModelState.IsValid)
                 {
-                    _context.Update(product);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProductExists(product.ID))
+                    try
                     {
-                        return NotFound();
+                        _context.Update(product);
+                        await _context.SaveChangesAsync();
                     }
-                    else
+                    catch (DbUpdateConcurrencyException)
                     {
-                        throw;
+                        if (!ProductExists(product.ID))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
                     }
                 }
+                
                 return RedirectToAction(nameof(Index));
             }
             return View(product);
@@ -178,13 +186,16 @@ namespace Lesson1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var product = await _context.Product.FindAsync(id);
-            if (product != null)
+            if(Program.currentUser.HasPermission(PermissionEntity.Product, PermissionRight.Delete))
             {
-                _context.Product.Remove(product);
-            }
+                var product = await _context.Product.FindAsync(id);
+                if (product != null)
+                {
+                    _context.Product.Remove(product);
+                }
 
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
+            }        
             return RedirectToAction(nameof(Index));
         }
 

@@ -57,9 +57,16 @@
                     @Html.DisplayFor(modelItem => item.Price)
                 </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+                    @if(Program.currentUser.HasPermission(PermissionEntity.Product, PermissionRight.Update))
+                    {
+                        <span><a asp-action="Edit" asp-route-id="@item.ID">Edit</a> | </span>
+                    }            
+                    <a asp-action="Details" asp-route-id="@item.ID">Details</a> 
+                    @if (Program.currentUser.HasPermission(PermissionEntity.Product, PermissionRight.Delete))
+                    {
+
+                        <span> | <a asp-action="Delete" asp-route-id="@item.ID">Delete</a></span>
+                    }
             </td>
         </tr>
 }

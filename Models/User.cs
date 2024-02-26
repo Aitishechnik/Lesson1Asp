@@ -3,7 +3,7 @@ using System.Net;
 
 namespace Lesson1.Models
 {
-    public enum UserRole { Client, Manager, Superviser, Admin }
+    public enum UserRole { Client, Registered, Manager, Superviser, Admin }
     public class User
     {
         [Key]
@@ -27,6 +27,8 @@ namespace Lesson1.Models
 
             if(Role == UserRole.Client)
                 InitClient();
+            if(Role == UserRole.Registered)
+                InitRegistered();
             if(Role == UserRole.Manager)
                 InitManager();
             if(Role == UserRole.Superviser)
@@ -36,6 +38,11 @@ namespace Lesson1.Models
         }
 
         private void InitClient()
+        {
+            UserPermissions.Add(new UserPermission(PermissionEntity.Product, PermissionRight.View, ID, this));
+        }
+
+        private void InitRegistered()
         {
             UserPermissions.Add(new UserPermission(PermissionEntity.Product, PermissionRight.View, ID, this));
         }

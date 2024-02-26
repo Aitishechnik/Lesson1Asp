@@ -32,6 +32,11 @@ namespace Lesson1.Controllers
             return View();
         }
 
+        public IActionResult Registration()
+        {
+            return View();
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string login, string password)
@@ -73,5 +78,22 @@ namespace Lesson1.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Registration(string firstName, string secondName, string tel, string email)
+        {
+            if (Program.currentUser != null)
+                return Redirect("Login");
+
+            if(_context.User.Where(user => user.Login != firstName + secondName).ToList().Count > 0)
+
+            _context.User.Add(new User());
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Registration");
+        }
+
+        
     }
 }

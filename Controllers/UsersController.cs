@@ -56,13 +56,17 @@ namespace Lesson1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,Login,Password,Role")] User user)
         {
-            if (ModelState.IsValid)
+            if (Program.currentUser.HasPermission(PermissionEntity.User, PermissionRight.Create))
+            {
+
+                if (ModelState.IsValid)
             {
                 user.Init();
 
                 _context.Add(user);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
+            }
             }
             return View(user);
         }
@@ -90,7 +94,10 @@ namespace Lesson1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Login,Password,Role")] User user)
         {
-            if (id != user.ID)
+            if (Program.currentUser.HasPermission(PermissionEntity.User, PermissionRight.Update))
+            {
+
+                if (id != user.ID)
             {
                 return NotFound();
             }
@@ -114,6 +121,7 @@ namespace Lesson1.Controllers
                         throw;
                     }
                 }
+            }
                 return RedirectToAction(nameof(Index));
             }
             return View(user);
@@ -142,13 +150,17 @@ namespace Lesson1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var user = await _context.User.FindAsync(id);
+            if (Program.currentUser.HasPermission(PermissionEntity.User, PermissionRight.Delete))
+            {
+
+                var user = await _context.User.FindAsync(id);
             if (user != null)
             {
                 _context.User.Remove(user);
             }
 
             await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 

@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Registration";
+}
+<h1>@ViewData["Title"]</h1>
+<form asp-action="Registration">
+    <div>
+        <table>
+            <tr>
+                <td>
+                    Имя
+                </td>
+                <td>
+                    <input type="text" name="firstName">
+                </td>
+            </tr>
+            <td>
+                Фамилия
+            </td>
+            <td>
+                <input type="text" name="secondName">
+            </td>
+            </tr>
+            <tr>
+                <td>
+                    Телефон
+                </td>
+                <td>
+                    <input type="tel" name="tel">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Почта
+                </td>
+                <td>
+                    <input type="email" name="email">
+                </td>
+            </tr>           
+        </table>       
+        <br/>        
+        <input type="submit" value="Go!">       
+    </div>
+</form>

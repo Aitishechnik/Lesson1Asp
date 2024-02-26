@@ -44,14 +44,14 @@
                     <td>
                         @if (Program.currentUser.HasPermission(PermissionEntity.User, PermissionRight.Update))
                         {
-                            <a asp-action="Edit" asp-route-id="@item.ID">Edit</a>
+                            <span><a asp-action="Edit" asp-route-id="@item.ID">Edit</a> | </span>
                         }
 
-                        | <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
+                         <a asp-action="Details" asp-route-id="@item.ID">Details</a> 
 
                         @if (Program.currentUser.HasPermission(PermissionEntity.User, PermissionRight.Delete))
                         {
-                            <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+                            <span> | <a asp-action="Delete" asp-route-id="@item.ID">Delete</a></span>
                         }                        
                     </td>
                 </tr>

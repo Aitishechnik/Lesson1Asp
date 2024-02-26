@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Edit";
 }
-@if (Program.currentUser.HasPermission(PermissionEntity.User, PermissionRight.Create))
+@if (Program.currentUser.HasPermission(PermissionEntity.Product, PermissionRight.Update))
 {
     <h1>Edit</h1>
 

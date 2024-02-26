@@ -4,6 +4,9 @@
     ViewData["Title"] = "Create";
 }
 
+@if(Program.currentUser.HasPermission(PermissionEntity.Product, PermissionRight.Create))
+{
+    
 <h1>Create</h1>
 
 <h4>Product</h4>
@@ -55,4 +58,9 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    }
+}
+else
+{
+    <h1>У вас нет доступа к этой странице.</h1>
 }
