@@ -50,10 +50,11 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Account">Account, @Program.currentUser.Login</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Logout">Logout</a>
+                                <form asp-action="Logout">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home">Logout</a>
+                                    </form>
                             </li>
                         }
-
                     </ul>
                 </div>
             </div>

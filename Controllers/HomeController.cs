@@ -149,7 +149,6 @@ namespace Lesson1.Controllers
             }
             else
             {
-                //_context.User.Add(new User(login, password, firstName, lastName, tel, email));
                 if(Program.currentUser.FirstName != null && 
                     Program.currentUser.FirstName != firstName &&
                     !firstName.IsNullOrEmpty())
