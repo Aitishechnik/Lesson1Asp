@@ -2,6 +2,7 @@ using Lesson1.Data;
 using Lesson1.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
 
 namespace Lesson1.Controllers
@@ -34,6 +35,17 @@ namespace Lesson1.Controllers
 
         public IActionResult Registration()
         {
+            ViewBag.IsLogin = false;
+            ViewBag.IsEmail = false;
+            ViewBag.IsTel = false;
+            return View();
+        }
+
+        public IActionResult Account()
+        {
+            ViewBag.IsLogin = false;
+            ViewBag.IsEmail = false;
+            ViewBag.IsTel = false;
             return View();
         }
 
@@ -42,7 +54,6 @@ namespace Lesson1.Controllers
         public async Task<IActionResult> Login(string login, string password)
         {
 
-            ViewBag.Answer = true;
             var temp = (await _context.User.Include(x => x.UserPermissions).ToListAsync())
                 .Where(User => User.Login == login && User.Password == password)
                 .ToList(); //проверка на count > 0
@@ -53,7 +64,6 @@ namespace Lesson1.Controllers
                 return View();
             }
 
-            ViewBag.Answer = false;
             return View();
         }
 
@@ -61,10 +71,9 @@ namespace Lesson1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-
             Program.currentUser = null;
 
-            return RedirectToAction("Index");
+            return Redirect("Index");
         }
 
         //1. Почитать про form в html
@@ -81,19 +90,93 @@ namespace Lesson1.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Registration(string firstName, string secondName, string tel, string email)
+        public async Task<IActionResult> Registration(string login, string password, string firstName, string lastName, string tel, string email)
         {
-            if (Program.currentUser != null)
-                return Redirect("Login");
+            ViewBag.IsLogin = false;
+            ViewBag.IsEmail = false;
+            ViewBag.IsTel = false;
+            if (Program.currentUser.Role != UserRole.Client)
+                return Redirect("Index");
+            List<User> temp = _context.User.Where(user => user.Login == login || user.Email == email || user.Tel == tel).ToList();
+            if (_context.User.Where(user => user.Login == login || user.Email == email || user.Tel == tel).ToList().Count > 0)
+            {
+                if (temp[0].Login == login)
+                {
+                    ViewBag.IsLogin = true;
+                }
+                if (temp[0].Email == email)
+                {
+                    ViewBag.IsEmail = true;
+                }
+                if (temp[0].Tel == tel)
+                {
+                    ViewBag.IsTel= true;
+                }
 
-            if(_context.User.Where(user => user.Login != firstName + secondName).ToList().Count > 0)
+                return View("Registration");
+            }
+            else
+            {
+                _context.User.Add(new User(login, password, firstName, lastName, tel, email));
+                await _context.SaveChangesAsync();
+            }
 
-            _context.User.Add(new User());
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction("Registration");
+            return RedirectToAction("Login");
         }
 
-        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Account(string password, string firstName, string lastName, string tel, string email)
+        {
+            ViewBag.IsLogin = false;
+            ViewBag.IsEmail = false;
+            ViewBag.IsTel = false;
+            
+            List<User> temp = _context.User.Where(user => user.Email == email || user.Tel == tel).ToList();
+            if (_context.User.Where(user => (user.Email == email && Program.currentUser.Email != email) || 
+            (user.Tel == tel && Program.currentUser.Tel != tel)).ToList().Count > 0)
+            {
+                if (temp[0].Email == email)
+                {
+                    ViewBag.IsEmail = true;
+                }
+                if (temp[0].Tel == tel)
+                {
+                    ViewBag.IsTel = true;
+                }
+              
+                return View("Account");
+            }
+            else
+            {
+                //_context.User.Add(new User(login, password, firstName, lastName, tel, email));
+                if(Program.currentUser.FirstName != null && 
+                    Program.currentUser.FirstName != firstName &&
+                    !firstName.IsNullOrEmpty())
+                    Program.currentUser.FirstName = firstName;
+
+                if (Program.currentUser.LastName != null &&
+                    Program.currentUser.LastName != lastName &&
+                    !lastName.IsNullOrEmpty())
+                    Program.currentUser.LastName = lastName;
+
+                if (Program.currentUser.Tel != null &&
+                    Program.currentUser.Tel != tel &&
+                    !tel.IsNullOrEmpty())
+                    Program.currentUser.Tel = tel;
+
+                if (Program.currentUser.Email != null &&
+                    Program.currentUser.Email != email &&
+                    !email.IsNullOrEmpty())
+                    Program.currentUser.Email = email;
+
+                if (Program.currentUser.Password != null &&
+                    !password.IsNullOrEmpty())
+                    Program.currentUser.Password = password;
+                await _context.SaveChangesAsync();
+            }
+
+            return View("Account");
+        }
     }
 }

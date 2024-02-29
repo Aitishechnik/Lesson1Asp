@@ -6,17 +6,17 @@
 <div class="login-form">
 
     
-        @if(Program.currentUser.ID == 0)
+        @if(Program.currentUser.Role == UserRole.Client)
         {
         <form asp-action="Login">
             <input type="text" name="login" placeholder="Логин" />
             <input type="password" name="password" placeholder="Пароль" />
             <input type="submit" value="Войти"/>
         </form>
-        }
-        else
-        {
-            <form asp-action="Logout">
+    }
+    else
+    {
+        <form asp-action="Logout">
             <button>Logout</button>
             <p class="login-error-line">@Program.currentUser.Login вы зашли!</p>
             </form>

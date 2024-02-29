@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using Lesson1.Data;
+﻿using Lesson1.Data;
 using Lesson1.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Lesson1.Controllers
 {
@@ -54,19 +49,19 @@ namespace Lesson1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Login,Password,Role")] User user)
+        public async Task<IActionResult> Create([Bind("ID,Login,Password,Role,FirstName,LastName,Tel,Email")] User user)
         {
             if (Program.currentUser.HasPermission(PermissionEntity.User, PermissionRight.Create))
             {
 
                 if (ModelState.IsValid)
-            {
-                user.Init();
+                {
+                    user.Init();
 
-                _context.Add(user);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
+                    _context.Add(user);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
             }
             return View(user);
         }
@@ -92,36 +87,36 @@ namespace Lesson1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Login,Password,Role")] User user)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Login,Password,Role,FirstName,LastName,Tel,Email")] User user)
         {
             if (Program.currentUser.HasPermission(PermissionEntity.User, PermissionRight.Update))
             {
 
                 if (id != user.ID)
-            {
-                return NotFound();
-            }
+                {
+                    return NotFound();
+                }
 
-            if (ModelState.IsValid)
-            {
-                try
+                if (ModelState.IsValid)
                 {
-                    user.Init();
-                    _context.Update(user);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!UserExists(user.ID))
+                    try
                     {
-                        return NotFound();
+                        user.Init();
+                        _context.Update(user);
+                        await _context.SaveChangesAsync();
                     }
-                    else
+                    catch (DbUpdateConcurrencyException)
                     {
-                        throw;
+                        if (!UserExists(user.ID))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
                     }
                 }
-            }
                 return RedirectToAction(nameof(Index));
             }
             return View(user);
@@ -154,12 +149,12 @@ namespace Lesson1.Controllers
             {
 
                 var user = await _context.User.FindAsync(id);
-            if (user != null)
-            {
-                _context.User.Remove(user);
-            }
+                if (user != null)
+                {
+                    _context.User.Remove(user);
+                }
 
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));
         }
