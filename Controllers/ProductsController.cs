@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Lesson1.Data;
 using Lesson1.Models;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Lesson1.Controllers
 {
@@ -21,45 +22,21 @@ namespace Lesson1.Controllers
 
         //Написать экшн который принимает на вход число, выводит список товаров, которые цена меньше введенной цифры
 
-
-        // GET: Products/Filter/5
-        public async Task<IActionResult> Filter(int? id)
-        {
-            if(id == null)
-            {
-                return NotFound();
-            }
-
-            var products = await _context.Product.ToListAsync();
-
-            List<Product> result = new List<Product>();
-            List<float> VATs = new List<float>();
-
-            foreach(var item in products)
-            {
-                VATs.Add(item.Price * 0.2f);
-
-                if (item.Price < id)
-                    result.Add(item);
-            }
-
-            ViewBag.VATs = VATs;
-            return View(result);
-        }
-
-
         // GET: Products 
         public async Task<IActionResult> Index()
         {
+            ViewBag.MinPrice = int.MaxValue;
+            ViewBag.MaxPrice = 0;
             var products = await _context.Product.ToListAsync();
 
-            ViewBag.sum = 0;
-            foreach(var pr in products)
+            foreach (var product in products)
             {
-                ViewBag.sum += pr.Calories;
-                ViewBag.randomTexts += pr.Name + "\n";
+                if(ViewBag.MinPrice > product.Price)
+                    ViewBag.MinPrice = product.Price;
+                if(ViewBag.MaxPrice < product.Price)
+                    ViewBag.MaxPrice = product.Price;
             }
-                
+
 
             return View(products);
         }
@@ -99,11 +76,11 @@ namespace Lesson1.Controllers
             {
 
                 if (ModelState.IsValid)
-            {
-                _context.Add(product);
-                await _context.SaveChangesAsync();
+                {
+                    _context.Add(product);
+                    await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
-            }
+                }
             }
             return View(product);
         }
@@ -157,7 +134,7 @@ namespace Lesson1.Controllers
                         }
                     }
                 }
-                
+
                 return RedirectToAction(nameof(Index));
             }
             return View(product);
@@ -186,7 +163,7 @@ namespace Lesson1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if(Program.currentUser.HasPermission(PermissionEntity.Product, PermissionRight.Delete))
+            if (Program.currentUser.HasPermission(PermissionEntity.Product, PermissionRight.Delete))
             {
                 var product = await _context.Product.FindAsync(id);
                 if (product != null)
@@ -195,8 +172,42 @@ namespace Lesson1.Controllers
                 }
 
                 await _context.SaveChangesAsync();
-            }        
+            }
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Filter(int? decreasingValue) //код в Get и Post повторяется. Можно ли создать элеменит ViewBag как поле?
+        {
+            ViewBag.MinPrice = int.MaxValue;
+            ViewBag.MaxPrice = 0;
+            var products = await _context.Product.ToListAsync();
+            foreach (var product in products)
+            {
+                if (ViewBag.MinPrice > product.Price)
+                    ViewBag.MinPrice = product.Price;
+                if (ViewBag.MaxPrice < product.Price)
+                    ViewBag.MaxPrice = product.Price;
+            }
+            if (decreasingValue.ToString().IsNullOrEmpty() || decreasingValue == 0)
+            {
+                return View("Index", products);
+            }
+
+            List<Product> result = new List<Product>();
+            List<float> VATs = new List<float>();
+
+            foreach (var item in products)
+            {
+                VATs.Add(item.Price * 0.2f);
+
+                if (item.Price < decreasingValue)
+                    result.Add(item);
+            }
+
+            ViewBag.VATs = VATs;
+            return View("Index", result);
         }
 
         private bool ProductExists(int id)

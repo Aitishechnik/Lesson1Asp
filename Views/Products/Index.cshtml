@@ -8,6 +8,29 @@
 
 <h1>Index</h1>
 
+<div>
+    <form asp-action="Filter" method="post">
+        <table>
+            <tbody> 
+                <tr>
+                    Введите значение:
+                </tr>
+                <tr>
+                    <td class="table-padding"><input type="number" name="decreasingValue" min="0" placeholder="От @ViewBag.MinPrice до @ViewBag.MaxPrice"></td>
+                </tr>
+                <tr>
+                    <td><input type="reset"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="submit">
+                    </td>                   
+                </tr>
+            </tbod>
+        </table>
+    </form>
+</div>
+
 @if(Program.currentUser.UserPermissions.FirstOrDefault(permition => permition.Right == PermissionRight.Create && permition.Entity == PermissionEntity.Product) != null)
 {
     <p>
@@ -75,5 +98,3 @@
 }
     </tbody>
 </table>
-<p> Итого: @ViewBag.sum </p>
-<pre> @ViewBag.randomTexts</pre>

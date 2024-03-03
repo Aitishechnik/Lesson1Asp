@@ -49,6 +49,15 @@ namespace Lesson1.Controllers
             return View();
         }
 
+        public IActionResult Logout()
+        {
+            Program.currentUser = null;
+            return RedirectToAction("Index");
+        }
+
+        //POSTMAN
+        //CDN
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string login, string password)
@@ -69,7 +78,7 @@ namespace Lesson1.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Logout()
+        public async Task<IActionResult> Logout(string logout)
         {
             Program.currentUser = null;
 
@@ -149,30 +158,37 @@ namespace Lesson1.Controllers
             }
             else
             {
-                if(Program.currentUser.FirstName != null && 
-                    Program.currentUser.FirstName != firstName &&
+                User thisUserInCintext = _context.User.FirstOrDefault(user => user.ID == Program.currentUser.ID);
+
+                if(thisUserInCintext.FirstName != null && 
+                    thisUserInCintext.FirstName != firstName &&
                     !firstName.IsNullOrEmpty())
-                    Program.currentUser.FirstName = firstName;
+                    thisUserInCintext.FirstName = firstName;
 
-                if (Program.currentUser.LastName != null &&
-                    Program.currentUser.LastName != lastName &&
+                if (thisUserInCintext.LastName != null &&
+                    thisUserInCintext.LastName != lastName &&
                     !lastName.IsNullOrEmpty())
-                    Program.currentUser.LastName = lastName;
+                    thisUserInCintext.LastName = lastName;
 
-                if (Program.currentUser.Tel != null &&
-                    Program.currentUser.Tel != tel &&
+                if (thisUserInCintext.Tel != null &&
+                    thisUserInCintext.Tel != tel &&
                     !tel.IsNullOrEmpty())
-                    Program.currentUser.Tel = tel;
+                    thisUserInCintext.Tel = tel;
 
-                if (Program.currentUser.Email != null &&
-                    Program.currentUser.Email != email &&
+                if (thisUserInCintext.Email != null &&
+                    thisUserInCintext.Email != email &&
                     !email.IsNullOrEmpty())
-                    Program.currentUser.Email = email;
+                    thisUserInCintext.Email = email;
 
-                if (Program.currentUser.Password != null &&
+                if (thisUserInCintext.Password != null &&
                     !password.IsNullOrEmpty())
-                    Program.currentUser.Password = password;
+                    thisUserInCintext.Password = password;
+
+                _context.Update(thisUserInCintext);
+
                 await _context.SaveChangesAsync();
+
+                Program.currentUser = thisUserInCintext;
             }
 
             return View("Account");
