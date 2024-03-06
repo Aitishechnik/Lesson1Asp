@@ -14,6 +14,8 @@ namespace Lesson1.Controllers
             _context = context;
         }
 
+        //Логгирование задвоено. Прихоит из Get и Post. Исправить в дебагере
+
         // GET: Users
         public async Task<IActionResult> Index()
         {

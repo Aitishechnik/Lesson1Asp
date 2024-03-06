@@ -8,12 +8,15 @@ using Microsoft.EntityFrameworkCore;
 using Lesson1.Data;
 using Lesson1.Models;
 using Microsoft.IdentityModel.Tokens;
+using Lesson1.Middleware;
 
 namespace Lesson1.Controllers
 {
-    public class ProductsController : Controller
+    public class ProductsController : Controller, ILoggerCustom<Product>
     {
         private readonly Lesson1Context _context;
+
+        public Middleware.Logger<Product> Logger { get; set; } = new Middleware.Logger<Product>();
 
         public ProductsController(Lesson1Context context)
         {
@@ -25,18 +28,9 @@ namespace Lesson1.Controllers
         // GET: Products 
         public async Task<IActionResult> Index()
         {
-            ViewBag.MinPrice = int.MaxValue;
-            ViewBag.MaxPrice = 0;
             var products = await _context.Product.ToListAsync();
 
-            foreach (var product in products)
-            {
-                if(ViewBag.MinPrice > product.Price)
-                    ViewBag.MinPrice = product.Price;
-                if(ViewBag.MaxPrice < product.Price)
-                    ViewBag.MaxPrice = product.Price;
-            }
-
+            GetLowHighPrices(products);
 
             return View(products);
         }
@@ -72,13 +66,14 @@ namespace Lesson1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,Name,Calories,Shelflife,Category,Description,Price")] Product product)
         {
-            if (Program.currentUser.HasPermission(PermissionEntity.Product, PermissionRight.Delete))
+            if (Program.currentUser.HasPermission(PermissionEntity.Product, PermissionRight.Create))
             {
 
                 if (ModelState.IsValid)
                 {
                     _context.Add(product);
                     await _context.SaveChangesAsync();
+                    Log(product, Program.currentUser, LogAction.Create);
                     return RedirectToAction(nameof(Index));
                 }
             }
@@ -98,6 +93,7 @@ namespace Lesson1.Controllers
             {
                 return NotFound();
             }
+            Log(product, Program.currentUser, LogAction.Update);
             return View(product);
         }
 
@@ -108,7 +104,7 @@ namespace Lesson1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Calories,Shelflife,Category,Description,Price")] Product product)
         {
-            if (Program.currentUser.HasPermission(PermissionEntity.Product, PermissionRight.Delete))
+            if (Program.currentUser.HasPermission(PermissionEntity.Product, PermissionRight.Update))
             {
                 if (id != product.ID)
                 {
@@ -137,6 +133,7 @@ namespace Lesson1.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
+            Log(product, Program.currentUser, LogAction.Update);
             return View(product);
         }
 
@@ -154,7 +151,7 @@ namespace Lesson1.Controllers
             {
                 return NotFound();
             }
-
+            Log(product, Program.currentUser, LogAction.Delete);
             return View(product);
         }
 
@@ -170,7 +167,7 @@ namespace Lesson1.Controllers
                 {
                     _context.Product.Remove(product);
                 }
-
+                Log(product, Program.currentUser, LogAction.Delete);
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));
@@ -178,18 +175,10 @@ namespace Lesson1.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Filter(int? decreasingValue) //код в Get и Post повторяется. Можно ли создать элеменит ViewBag как поле?
+        public async Task<IActionResult> Filter(int? decreasingValue)
         {
-            ViewBag.MinPrice = int.MaxValue;
-            ViewBag.MaxPrice = 0;
             var products = await _context.Product.ToListAsync();
-            foreach (var product in products)
-            {
-                if (ViewBag.MinPrice > product.Price)
-                    ViewBag.MinPrice = product.Price;
-                if (ViewBag.MaxPrice < product.Price)
-                    ViewBag.MaxPrice = product.Price;
-            }
+            GetLowHighPrices(products);
             if (decreasingValue.ToString().IsNullOrEmpty() || decreasingValue == 0)
             {
                 return View("Index", products);
@@ -210,9 +199,29 @@ namespace Lesson1.Controllers
             return View("Index", result);
         }
 
+        private void GetLowHighPrices(List<Product> products)
+        {
+            ViewBag.MinPrice = int.MaxValue;
+            ViewBag.MaxPrice = 0;           
+
+            foreach (var product in products)
+            {
+                if (ViewBag.MinPrice > product.Price)
+                    ViewBag.MinPrice = product.Price;
+                if (ViewBag.MaxPrice < product.Price)
+                    ViewBag.MaxPrice = product.Price;
+            }
+        }
+
         private bool ProductExists(int id)
         {
             return _context.Product.Any(e => e.ID == id);
+            
+        }
+
+        public void Log<T>(T entity, User user, LogAction logAction)
+        {
+            System.IO.File.AppendAllText(ILoggerCustom<Product>.FileAdress, Logger.PrepareLogText(entity as Product, user, logAction));
         }
     }
 }

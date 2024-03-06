@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Net;
+using Lesson1.Middleware;
 
 namespace Lesson1.Models
 {
